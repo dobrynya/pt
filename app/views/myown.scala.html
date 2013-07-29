@@ -1,0 +1,77 @@
+@(name: String)
+
+<html ng-app>
+<head>
+    <title>Application</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function ListCtrl($scope, $http) {
+          $scope.names = ['Dmitry', 'Alex']
+
+          $scope.action = function() {
+            alert("Link is pressed!");
+          }
+          $scope.chosen = ''
+          $scope.chosenAction = function() {
+            $scope.chosen = $("#choose").val()
+          }
+
+        $("#error").hide()
+        $("#good").hide()
+
+        $http.get("test/good/1").success(function(data) {
+          $scope.g = data
+          $("#good").show()
+        }).error(function(){
+          $("#error").show()
+        })
+
+        $http.get("test/allgoods").success(function(data) {
+          $scope.allgoods = data
+        })
+        }
+    </script>
+</head>
+<body>
+<form method="post">
+    <input type="text" name="name" ng-model="name" ng-init="name = '@name'">
+    <p>{{name}}</p>
+
+    <div ng-controller="ListCtrl">
+        <label for="choose">Choose the name! Currently chosen: {{chosen}}</label>
+        <p>
+        <select id="choose" name="n2" size="6">
+            <option ng-click="chosenAction()" ng-repeat="n in names">{{n}}</option>
+        </select>
+        </p>
+        <p>
+            <a href="#" ng-click="action()">Click!</a>
+        </p>
+        <p id="good" style="display: false">
+            Name: {{g.name}}
+            Price: {{g.price}}
+            Presented: <input type="checkbox" ng-model="g.presented">
+        </p>
+        <p id="error" style="display: false">
+            Error has occurred!
+        </p>
+        <p>
+            All goods
+            <table>
+               <thead><th>Name</th><th>Price</th><th>Presented</th></thead>
+               <tbody>
+                 <tr ng-repeat="g1 in allgoods">
+                     <td>{{g1.name}}</td>
+                     <td>{{g1.price}}</td>
+                     <td><input type="checkbox" ng-model="g1.presented"></td>
+                 </tr>
+               </tbody>
+            </table>
+        </p>
+    </div>
+</form>
+</body>
+</html>
