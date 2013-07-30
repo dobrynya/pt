@@ -6,6 +6,7 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
     <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.at("javascripts/my-first.js")" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js" type="text/javascript"></script>
     <script type="text/javascript">
         function ListCtrl($scope, $http) {
@@ -18,9 +19,6 @@
           $scope.chosenAction = function() {
             $scope.chosen = $("#choose").val()
           }
-
-        $("#error").hide()
-        $("#good").hide()
 
         $http.get("test/good/1").success(function(data) {
           $scope.g = data
@@ -50,7 +48,7 @@
         <p>
             <a href="#" ng-click="action()">Click!</a>
         </p>
-        <p id="good" style="display: false">
+        <p id="good">
             Name: {{g.name}}
             Price: {{g.price}}
             Presented: <input type="checkbox" ng-model="g.presented">
@@ -71,6 +69,10 @@
                </tbody>
             </table>
         </p>
+    </div>
+    <div ng-controller="MyOwnCtrl">
+        {{title}}
+        <button ng-click="action()">Click me</button>
     </div>
 </form>
 </body>

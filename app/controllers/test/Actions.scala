@@ -19,12 +19,12 @@ object Actions extends Controller {
     Good("Мозгоёб", 6.17, false)
   )
 
-  def index = Action {
-    Ok(views.html.myown("dmitry"))
+  implicit val good2json = new Writes[Good] {
+    def writes(g: Good): JsValue = Json.obj("name" -> g.name, "price" -> g.price, "presented" -> g.presented)
   }
 
-  def iter = Action(parse.raw) { request =>
-    Ok(views.html.index(new java.lang.String(request.body.asBytes(65535).get)))
+  def index = Action {
+    Ok(views.html.myown("dmitry"))
   }
 
   def text = Action {
@@ -32,17 +32,10 @@ object Actions extends Controller {
   }
 
   def allgoods = Action {
-    implicit val wr = new Writes[Good] {
-      def writes(g: Good): JsValue = Json.obj("name" -> g.name, "price" -> g.price, "presented" -> g.presented)
-    }
-
     Ok(Json.toJson(goods.toSeq))
   }
 
   def good(id: String) = Action {
-    println("requested " + id)
-    Ok(good2json(goods(id.toInt)))
+    Ok(Json.toJson(goods(id.toInt)))
   }
-
-  def good2json(g: Good) = Json.obj("name" -> g.name, "price" -> g.price, "presented" -> g.presented)
 }

@@ -6,7 +6,6 @@
 GET     /                           controllers.Application.index
 GET     /test                       controllers.test.Actions.index
 GET     /test/text                  controllers.test.Actions.text
-GET     /test/iter                  controllers.test.Actions.iter
 GET     /test/good/:id              controllers.test.Actions.good(id)
 GET     /test/allgoods              controllers.test.Actions.allgoods
 

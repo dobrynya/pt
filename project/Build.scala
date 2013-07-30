@@ -3,7 +3,6 @@ import Keys._
 import play.Project._
 
 object ApplicationBuild extends Build {
-
   val appName         = "pt"
   val appVersion      = "1.0-SNAPSHOT"
 
@@ -13,9 +12,10 @@ object ApplicationBuild extends Build {
     anorm
   )
 
+  coffeescriptOptions := Seq("bare")
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
-    // Add your own project settings here      
+    // Add your own project settings here
+    coffeescriptOptions := Seq("bare")
   )
-
 }
