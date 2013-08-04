@@ -7,7 +7,7 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
     <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/my-first.js")" type="text/javascript"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js" type="text/javascript"></script>
+    <script src="@routes.Assets.at("javascripts/angular.js")" type="text/javascript"></script>
 </head>
 <body>
 <form method="post">
@@ -17,22 +17,22 @@
     <div ng-controller="ListCtrl">
         <label for="choose">Choose the name! Currently chosen: {{chosen}}</label>
         <p>
-        <select id="choose" name="n2" size="6">
-            <option ng-click="chosenAction()" ng-repeat="n in names">{{n}}</option>
+        <select id="choose" ng-model="chosen" name="n2" size="6">
+            <option ng-repeat="n in names">{{n}}</option>
         </select>
         </p>
         <p>
-            <a href="#" ng-click="action()">Click!</a>
+            <a ng-click="action()">Click!</a>
         </p>
-        <p id="good" style="display: none">
+        <p ng-show="g">
             Name: {{g.name}}
             Price: {{g.price}}
             Presented: <input type="checkbox" ng-model="g.presented">
         </p>
-        <p id="error" style="display: none">
+        <p ng-hide="g">
             Error has occurred!
         </p>
-        <p id="allgoods" style="display: none">
+        <p ng-show="allgoods">
             All goods
             <table>
                <thead><th>Name</th><th>Price</th><th>Presented</th></thead>
@@ -47,8 +47,11 @@
         </p>
     </div>
     <div ng-controller="MyOwnCtrl">
-        {{title}}
-        <button ng-click="action()">Click me</button>
+        <select ng-model="selectedItem" size="10" style="width: 150px">
+            <option ng-show="listItems.length" ng-repeat="i in listItems">{{i}}</option>
+        </select>
+
+        Selected item: {{selectedItem}}
     </div>
 </form>
 </body>

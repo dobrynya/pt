@@ -1,0 +1,66 @@
+@()(implicit request: RequestHeader)
+
+<html ng-app>
+<head>
+    <title>Chat Box</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.at("javascripts/angular.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.at("javascripts/chat.js")" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+    var chatSocket = new WebSocket("@routes.Chat.connectToEcho.webSocketURL()")
+
+    var sendMessage = function() {
+        chatSocket.send(JSON.stringify({message: $("#msg").val()}))
+        $("#msg").val('')
+    }
+
+    chatSocket.onmessage = function(event) {
+        var data = JSON.parse(event.data)
+        if (data.error)
+            alert("Error: " + data.error)
+        else
+            alert("Success:" + JSON.stringify(data))
+    }
+    </script>
+</head>
+<body ng-controller="ChatCtrl">
+<p>
+    <textarea id="msg"></textarea>
+    <button onclick="sendMessage()">Try to send through websocket</button>
+</p>
+
+
+<p ng-hide="loggedIn">
+    <label for="username">User name</label>
+    <input id="username" type="text" ng-model="username">
+    <button ng-click="logIn()">Log in</button>
+</p>
+<p ng-show="errorMessage">
+    Cannot execute requested operation because of "{{errorMessage}}"
+    <button ng-click="closeErrorBox()">Close</button>
+</p>
+<p ng-show="loggedIn">You logged in as {{username}}
+</p>
+<p ng-show="loggedIn" id="messagesBox">
+    <div ng-repeat="m in messages">
+        <b>{{m.user}}</b>: {{m.text}}
+    </div>
+</p>
+<p ng-show="loggedIn">
+    <label for="messageBox">Enter message</label>
+    <textarea ng-model="message"></textarea>
+    <button ng-click="send()">Send</button>
+</p>
+<p ng-show="loggedIn">
+    <label for="userList">Users logged in chat</label>
+    <button ng-click="refresh()">Refresh</button>
+    <select id="userList" ng-model="selectedUser" size="10" style="width: 150px">
+        <option ng-repeat="u in users">{{u.name}}</option>
+    </select>
+</p>
+</body>
+</html>
