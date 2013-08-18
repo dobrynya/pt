@@ -9,10 +9,7 @@ GET     /test/text                  controllers.test.Actions.text
 GET     /test/good/:id              controllers.test.Actions.good(id)
 GET     /test/allgoods              controllers.test.Actions.allgoods
 GET     /chat                       controllers.Chat.index
-GET     /chat/users                 controllers.Chat.users
-POST    /chat/send                  controllers.Chat.send
 GET     /chat/logIn/:name           controllers.Chat.logIn(name)
-GET     /chat/connectToEcho         controllers.Chat.connectToEcho
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

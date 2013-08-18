@@ -1,40 +1,55 @@
-ChatCtrl = ($scope, $http) ->
-  $scope.users = []
+ChatCtrl = ($scope) ->
   $scope.messages = []
+  $scope.users = []
 
-  $scope.refresh = () ->
-    $http.get("/chat/users").success((data) ->
-      $scope.users = data
-      $scope.selectedUser = data[0]
-    )
-
-  $scope.refresh()
-
-  $scope.closeErrorBox = () -> $scope.errorMessage = null
+  $scope.send = () ->
+    if !$scope.message || !$scope.recipient
+      $scope.errorMessage = "You should enter valid message and select recepient before sending!"
+    else
+      $scope.websocket.send(JSON.stringify(
+        kind: "message"
+        recipient: $scope.recipient
+        text: $scope.message
+      ))
+      $scope.messages.push
+        sender: $scope.username
+        text: $scope.message
+      $scope.message = null
 
   $scope.logIn = () ->
     if !$scope.username
       $scope.errorMessage = "You should enter valid username!"
     else
-      $http.get("/chat/logIn/" + $scope.username).success((data) ->
-        if "success" == data.result
-          $scope.users = data.users
-          $scope.loggedIn = true
-        else
-          $scope.errorMessage = data.message
-      )
+      $scope.websocket = new WebSocket("ws://localhost:9000/chat/logIn/" + $scope.username)
+      $scope.websocket.onopen = () ->
+        $scope.websocket.send(JSON.stringify(
+          kind: "status"
+        ))
+        $scope.loggedIn = true
 
-  $scope.send = () ->
-    if !$scope.message
-      $scope.errorMessage = "You should enter valid message before sending!"
-    else
-      message =
-        user: $scope.username
-        text: $scope.message
-      $http.post("/chat/send", message).success((data) ->
-        if data.result == "success"
-          $scope.messages.push message
-          $scope.message = null
-        else
-          $scope.errorMessage = data.message
-      )
+      $scope.onclose = () ->
+        $scope.loggedIn = false
+
+      $scope.websocket.onmessage = (message) ->
+        data = JSON.parse(message.data)
+        switch data.kind
+          when "tick-tack"
+            console.info(JSON.stringify(data.time))
+          when "connected"
+            $scope.$apply(() ->
+              $scope.users = data.users.filter (u) -> u != $scope.username
+              $scope.recipient = $scope.users[0]
+              $scope.messages.push
+                sender: data.user
+                text: "I'm connected!"
+            )
+          when "message"
+            $scope.$apply(() ->
+              $scope.messages.push({
+                sender: data.sender
+                text: data.text
+              })
+            )
+          when "disconnected"
+            $scope.$apply(() -> $scope.users = $scope.users.filter (u) -> data.user != u)
+
