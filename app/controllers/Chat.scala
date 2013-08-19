@@ -30,7 +30,7 @@ object Chat extends Controller {
   }
 }
 
-object ChatManager extends Runnable {
+object ChatManager {
   var loggedInUsers = Map.empty[String, User]
 
   def users = loggedInUsers.toList.map(_._2).sortBy(_.name)
