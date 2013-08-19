@@ -21,14 +21,9 @@ ChatCtrl = ($scope) ->
       $scope.errorMessage = "You should enter valid username!"
     else
       $scope.websocket = new WebSocket("ws://localhost:9000/chat/logIn/" + $scope.username)
-      $scope.websocket.onopen = () ->
-        $scope.websocket.send(JSON.stringify(
-          kind: "status"
-        ))
-        $scope.loggedIn = true
+      $scope.websocket.onopen = () -> $scope.loggedIn = true
 
-      $scope.onclose = () ->
-        $scope.loggedIn = false
+      $scope.onclose = () -> $scope.loggedIn = false
 
       $scope.websocket.onmessage = (message) ->
         data = JSON.parse(message.data)
@@ -52,4 +47,8 @@ ChatCtrl = ($scope) ->
             )
           when "disconnected"
             $scope.$apply(() -> $scope.users = $scope.users.filter (u) -> data.user != u)
-
+          when "error"
+            $scope.$apply(() ->
+              $scope.errorMessage = data.errorMessage
+              $scope.loggedIn = false
+            )

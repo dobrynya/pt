@@ -37,7 +37,9 @@ object ChatManager {
 
   def logIn(username: String) = {
     if (loggedInUsers.contains(username))
-      throw new IllegalArgumentException("User %s already logged in!" format username)
+      (Iteratee.ignore[JsValue],
+        Enumerator[JsValue](Json.obj("kind" -> "error",
+          "errorMessage" -> "User %s already logged in!".format(username))) >>> Enumerator.eof)
     else {
       val (enumerator, channel) = Concurrent.broadcast[JsValue]
       val user = User(username, channel)
@@ -56,10 +58,12 @@ object ChatManager {
         ChatManager.disconnected(user)
       }
 
-      loggedInUsers += username -> user
       connected(user)
+      loggedInUsers += username -> user
 
-      (iteratee, enumerator)
+      (iteratee,
+        Enumerator[JsValue](Json.obj("kind" -> "connected", "user" -> user.name,
+          "users" -> loggedInUsers.toList.map(_._2.name))) >>> enumerator)
     }
   }
 
