@@ -16,10 +16,6 @@ case class User(name: String, channel: Concurrent.Channel[JsValue]) {
 case class Message(recipient: String, text: String)
 
 object Chat extends Controller {
-  implicit val user2json = new Writes[User] {
-    def writes(o: User) = Json.obj("name" -> o.name)
-  }
-
   def index = Action {implicit request =>
     Ok(views.html.chat())
   }
@@ -45,32 +41,22 @@ object ChatManager {
       val user = User(username, channel)
 
       val iteratee = Iteratee.foreach[JsValue] {m =>
-        (m \ "kind").asOpt[String] match {
-          case Some("status") =>
-            println("Status requested by user %s" format user.name)
-            user.send(Json.obj("kind" -> "connected", "user" -> user.name, "users" -> loggedInUsers.toList.map(_._2.name)))
-          case _ =>
-            println("Received request: " + m)
-            processMessage(Message((m \ "recipient").as[String], (m \ "text").as[String]), user)
-        }
+        println("Received request: " + m)
+        processMessage(Message((m \ "recipient").as[String], (m \ "text").as[String]), user)
       } mapDone {_ =>
         println("User %s is disconnected!" format username)
         ChatManager.disconnected(user)
       }
 
       connected(user)
-      loggedInUsers += username -> user
 
-      (iteratee,
-        Enumerator[JsValue](Json.obj("kind" -> "connected", "user" -> user.name,
+      (iteratee, Enumerator[JsValue](Json.obj("kind" -> "connected", "user" -> user.name,
           "users" -> loggedInUsers.toList.map(_._2.name))) >>> enumerator)
     }
   }
 
   def broadcast(msg: JsValue) {
-    loggedInUsers.foreach {
-      case (name, u) => u.send(msg)
-    }
+    loggedInUsers.foreach {_._2.send(msg)}
   }
 
   def disconnected(user: User) {
@@ -79,6 +65,7 @@ object ChatManager {
   }
 
   def connected(user: User) {
+    loggedInUsers += user.name -> user
     broadcast(Json.obj("kind" -> "connected", "user" -> user.name, "users" -> loggedInUsers.toList.map(_._2.name)))
   }
 
