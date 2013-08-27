@@ -46,7 +46,12 @@ ChatCtrl = ($scope) ->
               })
             )
           when "disconnected"
-            $scope.$apply(() -> $scope.users = $scope.users.filter (u) -> data.user != u)
+            $scope.$apply(() ->
+              $scope.users = $scope.users.filter (u) -> data.user != u
+              $scope.messages.push
+                sender: data.user
+                text: "I'm disconnected!"
+            )
           when "error"
             $scope.$apply(() ->
               $scope.errorMessage = data.errorMessage
