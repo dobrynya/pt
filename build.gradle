@@ -1,0 +1,15 @@
+apply plugin: "idea"
+apply plugin: "scala"
+
+repositories {
+  mavenCentral()
+}
+
+sourceSets {
+    main.scala.srcDir "app"
+    main.resources.srcDir "public"
+}
+
+dependencies {
+  compile "org.scala-lang:scala-library:2.10.3", "com.datastax.cassandra:cassandra-driver-core:2.0.0-beta1"
+}

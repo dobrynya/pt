@@ -1,7 +1,9 @@
 .own {
     color: darkcyan;
+    font: bold;
 }
 
 .opponent {
     color: #0165b2;
+    font: bold;
 }

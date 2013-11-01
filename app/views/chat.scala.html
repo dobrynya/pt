@@ -27,12 +27,17 @@
 </p>
 <p ng-show="loggedIn">
     <label for="userList">Users logged in chat</label>
-    <select ng-model="recipient" ng-options="user as user for user in users" size="10" style="width: 150px"></select>
+    <select ng-click="changeRecipient()" ng-model="recipient" ng-options="user as user for user in users" size="10" style="width: 150px"></select>
+    <button ng-click="deleteChat()">Очистить историю</button>
 </p>
 <p ng-show="loggedIn">
-    <div ng-repeat="m in messages">
-        <b>{{m.sender}}</b>: <span ng-class="{own: m.sender == username, opponent: m.sender != username}">{{m.text}}</span>
-    </div>
+  <table>
+    <tr ng-repeat="m in messages">
+      <td><b>{{m.created}}</b></td>
+      <td><span ng-class="{own: m.sender == username, opponent: m.sender != username}">{{m.sender}}</span></td>
+      <td><span ng-class="{own: m.sender == username, opponent: m.sender != username}">{{m.text}}</span></td>
+    </tr>
+  </table>
 </p>
 </body>
 </html>
