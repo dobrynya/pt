@@ -13,13 +13,13 @@ class CassandraStorage extends Storage {
 
   private val deleteChatQuery = session.prepare("delete from chats where user = ? and opponent = ?")
 
-  private val createChat = session.prepare("insert into chats (user, opponent, chat) values (?, ?, ?) if not exists")
+  private val createChat = session.prepare("insert into chats (user, opponent, chat, created) values (?, ?, ?, ?) if not exists")
 
   private val findChatQuery = session.prepare("select * from chats where user = ? and opponent = ?")
 
   private val createMessage = session.prepare("insert into messages (chat, ts, author, msg) values (?, now(), ?, ?)")
 
-  private val chatMessages = session.prepare("select author, msg, dateOf(ts) from messages where chat = ?")
+  private val chatMessages = session.prepare("select author, msg, dateOf(ts) as created from messages where chat = ?")
 
   def findUserOrCreate(username: String) =
     session.execute("select * from users where username = ?", username)
@@ -28,16 +28,18 @@ class CassandraStorage extends Storage {
 
   def deleteChat(u1: User, u2: User) = session.execute(deleteChatQuery.bind(u1.username, u2.username))
 
-  def findChat(u1: User, u2: User) =
+  def findChat(u1: User, u2: User) = {
+    session.execute(findChatQuery.bind(u2.username, u1.username)).headOption.getOrElse(createNewChat(u2, u1))
     session.execute(findChatQuery.bind(u1.username, u2.username)).map(r => Chat(r.getString("chat"))).headOption
+  }
 
   def findChatOrCreate(u1: User, u2: User) = findChat(u1, u2) getOrElse createNewChat(u1, u2)
 
   def createNewChat(u1: User, u2: User) = {
     val chat = Chat(chatId(u1, u2))
-    session.execute(createChat.bind(u1.username, u2.username, chat.id))
+    session.execute(createChat.bind(u1.username, u2.username, chat.id, chat.created))
     println("Chat %s for %s and %s is created".format(chat, u1, u2))
-    session.execute(createChat.bind(u2.username, u1.username, chat.id))
+    session.execute(createChat.bind(u2.username, u1.username, chat.id, chat.created))
     println("Chat %s for %s and %s is created".format(chat, u2, u1))
     chat
   }
@@ -49,7 +51,7 @@ class CassandraStorage extends Storage {
 
   def findMessages(u1: User, u2: User) =
     findChat(u1, u2).map(ch =>
-      for (r <- session.execute(chatMessages.bind(ch.id))) yield
+      for (r <- session.execute(chatMessages.bind(ch.id)) if ch.created.before(r.getDate("created"))) yield
         Message(r.getString("author"), r.getString("msg"), r.getDate(2))
     ) getOrElse Nil
 
