@@ -60,6 +60,7 @@ ChatCtrl = ($scope) ->
               if data.sender == $scope.recipient
                 $scope.messages.push({
                   sender: data.sender
+                  created: data.created
                   text: data.text
                 })
             )
